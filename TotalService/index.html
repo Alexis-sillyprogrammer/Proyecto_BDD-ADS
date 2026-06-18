@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AutoService Total | Autopartes y Servicios</title>
+  <meta name="description" content="Catálogo de autopartes, servicios de mantenimiento y contacto de AutoService Total." />
+  <link rel="icon" href="img/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ====== Encabezado ====== -->
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <img class="logo" src="img/logo.png" alt="AutoService Total" />
+        <div class="title">
+          <h1>AutoService Total</h1>
+          <small>Autopartes · Servicio · Confianza</small>
+        </div>
+      </div>
+
+      <nav>
+        <div id="hamburger" class="hamburger" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </div>
+        <ul id="menu">
+          <li><a href="#home">Inicio</a></li>
+          <li><a href="#about">Sobre Nosotros</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="#personalizado">Personalizado</a></li>
+        </ul>
+      </nav>
+
+      <div id="authArea" class="auth-area">
+        <button id="btnLogin" class="btn btn-small">Iniciar Sesión</button>
+        <div id="userInfo" class="user-info" style="display:none;">
+          <span id="userName"></span>
+          <button id="btnLogout" class="btn btn-small ghost">Cerrar Sesión</button>
+        </div>
+      </div>
+    
+    </div>
+  </header>
+
+  <!-- ====== Hero / Slider ====== -->
+  <section id="home" class="hero">
+    <div class="slides" id="slides">
+      <div class="slide active" style="background-image:url('img/slide1.jpg');"></div>
+      <div class="slide" style="background-image:url('img/slide2.jpg');"></div>
+      <div class="slide" style="background-image:url('img/slide3.jpeg');"></div>
+    </div>
+    <div class="hero-content container">
+      <div>
+        <h2>Autopartes de calidad para tu camino</h2>
+        <p>Refacciones nuevas y de segunda mano, con asesoría experta y servicio el mismo día.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#productos">Ver catálogo</a>
+          <a class="btn btn-outline" href="#contacto">Solicitar cotización</a>
+          <a class="btn btn-about" href="#about">Conócenos</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Botones rápidos ====== -->
+  <section class="container">
+    <div class="section-head">
+      <h3>Tu auto, siempre al 100%</h3>
+      <p class="muted">Acelera directo a lo que buscas...</p>
+    </div>
+    <div class="quick-links">
+      <div class="qcard">
+        <div class="qicon">🧰</div>
+        <div>
+          <div class="qtitle">Mantenimiento Express</div>
+          <div class="qdesc">Aceite, filtros y baterías</div>
+        </div>
+        <a class="btn qbtn" href="#productos">Ir</a>
+      </div>
+      <div class="qcard">
+        <div class="qicon">⚙️</div>
+        <div>
+          <div class="qtitle">Sistemas y Motor</div>
+          <div class="qdesc">Bandas, bujías, bombas</div>
+        </div>
+        <a class="btn qbtn" href="#productos">Ir</a>
+      </div>
+      <div class="qcard">
+        <div class="qicon">🛞</div>
+        <div>
+          <div class="qtitle">Dirección y Frenos</div>
+          <div class="qdesc">Balatas, discos y rines</div>
+        </div>
+        <a class="btn qbtn" href="#productos">Ir</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Productos ====== -->
+  <section id="productos" class="container">
+    <div class="section-head">
+      <h3>Catálogo de Autopartes</h3>
+      <p class="muted">Cargamos 3 productos y puedes agregar más</p>
+    </div>
+
+    <div id="productGrid" class="grid">
+      <article class="card">
+        <img src="img/producto_bujias.jpg" alt="Juego de Bujías" />
+        <div class="body">
+          <h4>Juego de Bujías Iridium</h4>
+          <div class="price">$850</div>
+          <p>Encendido eficiente y mayor durabilidad.</p>
+          <div class="tags">
+            <span class="tag">Motor</span><span class="tag">Nuevas</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="img/producto_frenos.jpg" alt="Kit de Frenos" />
+        <div class="body">
+          <h4>Kit Balatas + Discos</h4>
+          <div class="price">$2,150</div>
+          <p>Frenado seguro con compuestos de alto rendimiento.</p>
+          <div class="tags">
+            <span class="tag">Frenos</span><span class="tag">Premium</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="img/producto_bateria.jpg" alt="Batería Automotriz" />
+        <div class="body">
+          <h4>Batería AGM 70Ah</h4>
+          <div class="price">$2,999</div>
+          <p>Arranque potente y vida útil extendida.</p>
+          <div class="tags">
+            <span class="tag">Eléctrico</span><span class="tag">Garantía 24m</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="more-wrap">
+      <button id="btnMore" class="btn ghost">Cargar más</button>
+    </div>
+  </section>
+
+  <!-- ====== About ====== -->
+  <section id="about" class="container">
+    <div class="section-head">
+      <h3>Acerca de AutoService Total</h3>
+      <p class="muted">Calidad, experiencia y servicio</p>
+    </div>
+    <div class="about">
+      <div class="photo">
+        <img src="img/Alan.jpg" alt="Foto del desarrollador" />
+      </div>
+      <div class="text">
+        <h4>¿Quiénes somos?</h4>
+        <p>
+          Somos una pequeña empresa familiar, donde padre e hijo se dedicadan a ofrecer autopartes de calidad y servicios de mantenimiento para vehículos. Con más de 5 años de experiencia, 
+          nuestro objetivo es brindar confianza y rapidez a nuestros clientes.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Contacto ====== -->
+  <section id="contacto" class="container">
+    <div class="section-head">
+      <h3>Contacto</h3>
+      <p class="muted">Escríbenos para cotizaciones y disponibilidad</p>
+    </div>
+    <div class="contact">
+      <form id="contactForm" novalidate>
+        <div class="field">
+          <label for="name">Nombre</label>
+          <input id="name" name="name" type="text" required />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+        </div>
+        <div class="field">
+          <label for="cel">Celular</label>
+          <input id="cel" name="cel" type="tel" required />
+        </div>
+        <div class="field">
+          <label for="msg">Mensaje</label>
+          <textarea id="msg" name="msg" rows="4" required></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+      </form>
+
+      <div class="map">
+<iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3732.009109304152!2d-103.29922382421255!3d20.709854698654425!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjDCsDQyJzM1LjUiTiAxMDPCsDE3JzQ3LjkiVw!5e0!3m2!1ses-419!2smx!4v1757082104799!5m2!1ses-419!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>      </div>
+    </div>
+  </section>
+
+  <!-- ====== Personalizado ====== -->
+  <section id="personalizado" class="container">
+    <div class="section-head">
+      <h3>Paquetes Personalizados</h3>
+      <p class="muted">Arma tu combo y obtén descuento</p>
+    </div>
+    <div class="grid">
+      <article class="card">
+        <img src="img/pack_mantenimiento.jpg" alt="Paquete de Mantenimiento" />
+        <div class="body">
+          <h4>Pack Mantenimiento</h4>
+          <p>Aceite sintético + Filtro de aceite</p>
+          <div class="price">$1,299</div>
+        </div>
+      </article>
+      <article class="card">
+        <img src="img/pack_refuerzo.jpeg" alt="Paquete Refuerzo" />
+        <div class="body">
+          <h4>Pack Refuerzo</h4>
+          <p>Balatas + banda</p>
+          <div class="price">$400</div>
+        </div>
+      </article>
+      <article class="card">
+        <img src="img/pack_electrico.jpeg" alt="Paquete Electrico" />
+        <div class="body">
+          <h4>Pack Electrico</h4>
+          <p>Bateria + Bujias</p>
+          <div class="price">$2,499</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ====== Modal de Login/Registro ====== -->
+  <div id="authModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <button id="closeModal" class="close-btn">&times;</button>
+      
+      <div id="loginTab" class="tab-content active">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+          <div class="field">
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" required />
+          </div>
+          <div class="field">
+            <label for="loginPassword">Contraseña</label>
+            <input id="loginPassword" type="password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Ingresar</button>
+        </form>
+        <p>¿No tienes cuenta? <button id="switchToRegister" class="link-btn">Regístrate aquí</button></p>
+      </div>
+
+      <div id="registerTab" class="tab-content" style="display:none;">
+        <h2>Crear Cuenta</h2>
+        <form id="registerForm">
+          <div class="field">
+            <label for="registerNombre">Nombre</label>
+            <input id="registerNombre" type="text" required />
+          </div>
+          <div class="field">
+            <label for="registerEmail">Email</label>
+            <input id="registerEmail" type="email" required />
+          </div>
+          <div class="field">
+            <label for="registerPassword">Contraseña</label>
+            <input id="registerPassword" type="password" required />
+          </div>
+          <div class="field">
+            <label for="registerRol">Tipo de Usuario</label>
+            <select id="registerRol" required>
+              <option value="cliente">Cliente</option>
+              <option value="empleado">Empleado</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Registrarse</button>
+        </form>
+        <p>¿Ya tienes cuenta? <button id="switchToLogin" class="link-btn">Inicia sesión aquí</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Footer ====== -->
+  <footer>
+    <div class="foot">
+      <div>
+        <h4>AutoService Total</h4>
+        <p>Refacciones confiables y atención rápida.</p>
+        <small>© <span id="y"></span> AutoService Total.</small>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#home">Inicio</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Redes</h4>
+        <a href="https://www.facebook.com/alan.rodriguezfranco/">Facebook</a>
+      </div>
+      <div>
+        <h4>Datos del Desarrollador</h4>
+        <p>Alan Arturo Rodriguez Franco</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
