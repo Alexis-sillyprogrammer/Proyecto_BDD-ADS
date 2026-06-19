@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy
+  namespace: totalservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: envoy }
+  template:
+    metadata:
+      labels: { app: envoy }
+    spec:
+      containers:
+        - name: envoy
+          image: localhost/totalservice-envoy:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+            - containerPort: 9901
+          readinessProbe:
+            httpGet: { path: /ready, port: 9901 }
+            initialDelaySeconds: 3

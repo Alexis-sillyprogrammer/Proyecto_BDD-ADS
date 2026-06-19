@@ -1,0 +1,17 @@
+{
+  "name": "backend-grpc",
+  "version": "1.0.0",
+  "description": "Backend gRPC de AutoService Total",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.10.9",
+    "@grpc/proto-loader": "^0.7.13",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.7.1"
+  }
+}

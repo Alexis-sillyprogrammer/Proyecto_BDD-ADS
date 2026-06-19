@@ -1,4 +1,16 @@
-const API_URL = '/api';
+const { AuthServiceClient, ProductoServiceClient, PedidoServiceClient } = require('./generated/totalservice_grpc_web_pb.js');
+const {
+  RegistroRequest, LoginRequest, MeRequest,
+  Vacio, ProductoIdRequest, CrearProductoRequest,
+  CrearPedidoRequest,
+} = require('./generated/totalservice_pb.js');
+
+const GRPC_WEB_URL = window.GRPC_WEB_URL || '/grpc';
+
+const authClient = new AuthServiceClient(GRPC_WEB_URL);
+const productoClient = new ProductoServiceClient(GRPC_WEB_URL);
+const pedidoClient = new PedidoServiceClient(GRPC_WEB_URL);
+
 let usuarioActual = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,20 +24,41 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarAño();
 });
 
-async function verificarSesion() {
-  try {
-    const response = await fetch(`${API_URL}/auth/me`, {
-      credentials: 'include'
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      usuarioActual = data;
-      actualizarUIUsuario();
-    }
-  } catch (err) {
-    console.log('No hay sesión activa');
+function obtenerToken() {
+  return localStorage.getItem('jwt');
+}
+
+function guardarSesion(token, rol, nombre) {
+  localStorage.setItem('jwt', token);
+  usuarioActual = { rol, nombre };
+}
+
+function cerrarSesionLocal() {
+  localStorage.removeItem('jwt');
+  usuarioActual = null;
+}
+
+function metadataConToken() {
+  const token = obtenerToken();
+  return token ? { authorization: `Bearer ${token}` } : {};
+}
+
+function verificarSesion() {
+  const token = obtenerToken();
+  if (!token) {
+    actualizarUIUsuario();
+    return;
   }
+
+  authClient.me(new MeRequest(), metadataConToken(), (err, respuesta) => {
+    if (err) {
+      cerrarSesionLocal();
+      actualizarUIUsuario();
+      return;
+    }
+    usuarioActual = { rol: respuesta.getRol(), nombre: respuesta.getNombre() };
+    actualizarUIUsuario();
+  });
 }
 
 function actualizarUIUsuario() {
@@ -33,12 +66,12 @@ function actualizarUIUsuario() {
   const userInfo = document.getElementById('userInfo');
   const userName = document.getElementById('userName');
   const btnAgregarProducto = document.getElementById('btnAgregarProducto');
-  
+
   if (usuarioActual) {
     btnLogin.style.display = 'none';
     userInfo.style.display = 'flex';
     userName.textContent = `${usuarioActual.rol === 'empleado' ? '👨‍💼' : '👤'} Usuario`;
-    
+
     if (usuarioActual.rol === 'empleado' && btnAgregarProducto) {
       btnAgregarProducto.style.display = 'inline-block';
     }
@@ -58,9 +91,6 @@ function manejarModal() {
   const loginTab = document.getElementById('loginTab');
   const registerTab = document.getElementById('registerTab');
 
-  console.log('Inicializando modal...');
-  console.log('closeModal existe:', closeModal);
-
   btnLogin.addEventListener('click', () => {
     authModal.style.setProperty('display', 'flex', 'important');
   });
@@ -73,7 +103,6 @@ function manejarModal() {
 
   authModal.addEventListener('click', (e) => {
     if (e.target.id === 'authModal') {
-      console.log('Cerrando por click fuera');
       authModal.style.setProperty('display', 'none', 'important');
     }
   });
@@ -96,126 +125,98 @@ function manejarFormularios() {
   const registerForm = document.getElementById('registerForm');
   const btnLogout = document.getElementById('btnLogout');
 
-  loginForm.addEventListener('submit', async (e) => {
+  loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    
-    try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password })
-      });
+    const req = new LoginRequest();
+    req.setEmail(document.getElementById('loginEmail').value);
+    req.setPassword(document.getElementById('loginPassword').value);
 
-      if (response.ok) {
-        const data = await response.json();
-        usuarioActual = { rol: data.rol, nombre: data.nombre };
-        actualizarUIUsuario();
-        document.getElementById('authModal').style.display = 'none';
-        loginForm.reset();
-        alert('¡Bienvenido ' + data.nombre + '!');
-        cargarProductos();
-      } else {
+    authClient.login(req, {}, (err, respuesta) => {
+      if (err) {
         alert('Email o contraseña incorrectos');
+        return;
       }
-    } catch (err) {
-      alert('Error al iniciar sesión: ' + err.message);
-    }
-  });
-
-  registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nombre = document.getElementById('registerNombre').value;
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    const rol = document.getElementById('registerRol').value;
-
-    try {
-      const response = await fetch(`${API_URL}/auth/registro`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, email, password, rol })
-      });
-
-      if (response.ok) {
-        alert('¡Cuenta creada! Ahora inicia sesión');
-        document.getElementById('registerTab').classList.remove('active');
-        document.getElementById('loginTab').classList.add('active');
-        registerForm.reset();
-      } else {
-        const error = await response.json();
-        alert('Error: ' + error.error);
-      }
-    } catch (err) {
-      alert('Error al registrarse: ' + err.message);
-    }
-  });
-
-  btnLogout.addEventListener('click', async () => {
-    try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-      usuarioActual = null;
+      guardarSesion(respuesta.getToken(), respuesta.getRol(), respuesta.getNombre());
       actualizarUIUsuario();
+      document.getElementById('authModal').style.display = 'none';
+      loginForm.reset();
+      alert('¡Bienvenido ' + respuesta.getNombre() + '!');
       cargarProductos();
-      alert('Sesión cerrada');
-    } catch (err) {
-      alert('Error al cerrar sesión: ' + err.message);
-    }
+    });
+  });
+
+  registerForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const req = new RegistroRequest();
+    req.setNombre(document.getElementById('registerNombre').value);
+    req.setEmail(document.getElementById('registerEmail').value);
+    req.setPassword(document.getElementById('registerPassword').value);
+    req.setRol(document.getElementById('registerRol').value);
+
+    authClient.registro(req, {}, (err) => {
+      if (err) {
+        alert('Error: ' + err.message);
+        return;
+      }
+      alert('¡Cuenta creada! Ahora inicia sesión');
+      document.getElementById('registerTab').classList.remove('active');
+      document.getElementById('loginTab').classList.add('active');
+      registerForm.reset();
+    });
+  });
+
+  btnLogout.addEventListener('click', () => {
+    cerrarSesionLocal();
+    actualizarUIUsuario();
+    cargarProductos();
+    alert('Sesión cerrada');
   });
 }
 
-async function cargarProductos() {
+function cargarProductos() {
   const productGrid = document.getElementById('productGrid');
-  
-  try {
-    const response = await fetch(`${API_URL}/productos`, {
-      credentials: 'include'
-    });
-    
-    if (response.ok) {
-      const productos = await response.json();
-      productGrid.innerHTML = ''; // Limpiar
-      
-      if (productos.length === 0) {
-        productGrid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999;">No hay productos disponibles</p>';
-        return;
-      }
 
-      productos.forEach(producto => {
-        const card = document.createElement('article');
-        card.className = 'card';
-        card.innerHTML = `
-          <img src="${producto.img || 'img/default.jpg'}" alt="${producto.titulo}" />
-          <div class="body">
-            <h4>${producto.titulo}</h4>
-            <div class="price">$${producto.precio}</div>
-            <p>${producto.descripcion || 'Sin descripción'}</p>
-            <div class="tags">
-              <span class="tag">Stock: ${producto.stock}</span>
-            </div>
-            ${usuarioActual && usuarioActual.rol === 'cliente' ? `
-              <button class="btn btn-primary btn-pedir" data-id="${producto._id}" data-titulo="${producto.titulo}">Pedir</button>
-            ` : ''}
-          </div>
-        `;
-        productGrid.appendChild(card);
-      });
-
-      if (usuarioActual && usuarioActual.rol === 'cliente') {
-        document.querySelectorAll('.btn-pedir').forEach(btn => {
-          btn.addEventListener('click', (e) => mostrarFormularioPedido(e.target.dataset.id, e.target.dataset.titulo));
-        });
-      }
+  productoClient.obtenerProductos(new Vacio(), {}, (err, respuesta) => {
+    if (err) {
+      console.error('Error cargando productos:', err);
+      productGrid.innerHTML = '<p style="grid-column:1/-1;color:red;">Error al cargar productos</p>';
+      return;
     }
-  } catch (err) {
-    console.error('Error cargando productos:', err);
-    productGrid.innerHTML = '<p style="grid-column:1/-1;color:red;">Error al cargar productos</p>';
-  }
+
+    const productos = respuesta.getProductosList();
+    productGrid.innerHTML = '';
+
+    if (productos.length === 0) {
+      productGrid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999;">No hay productos disponibles</p>';
+      return;
+    }
+
+    productos.forEach((producto) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${producto.getImg() || 'img/default.jpg'}" alt="${producto.getTitulo()}" />
+        <div class="body">
+          <h4>${producto.getTitulo()}</h4>
+          <div class="price">$${producto.getPrecio()}</div>
+          <p>${producto.getDescripcion() || 'Sin descripción'}</p>
+          <div class="tags">
+            <span class="tag">Stock: ${producto.getStock()}</span>
+          </div>
+          ${usuarioActual && usuarioActual.rol === 'cliente' ? `
+            <button class="btn btn-primary btn-pedir" data-id="${producto.getId()}" data-titulo="${producto.getTitulo()}">Pedir</button>
+          ` : ''}
+        </div>
+      `;
+      productGrid.appendChild(card);
+    });
+
+    if (usuarioActual && usuarioActual.rol === 'cliente') {
+      document.querySelectorAll('.btn-pedir').forEach((btn) => {
+        btn.addEventListener('click', (e) => mostrarFormularioPedido(e.target.dataset.id, e.target.dataset.titulo));
+      });
+    }
+  });
 }
 
 function mostrarFormularioPedido(productoId, productoTitulo) {
@@ -226,31 +227,24 @@ function mostrarFormularioPedido(productoId, productoTitulo) {
   }
 
   const cantidad = prompt(`¿Cuántas unidades de "${productoTitulo}" deseas pedir?`, '1');
-  
+
   if (cantidad && parseInt(cantidad) > 0) {
     crearPedido(productoId, parseInt(cantidad));
   }
 }
 
-async function crearPedido(productoId, cantidad) {
-  try {
-    const response = await fetch(`${API_URL}/pedidos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ producto: productoId, cantidad })
-    });
+function crearPedido(productoId, cantidad) {
+  const req = new CrearPedidoRequest();
+  req.setProducto(productoId);
+  req.setCantidad(cantidad);
 
-    if (response.ok) {
-      const pedido = await response.json();
-      alert('¡Pedido creado exitosamente! ID: ' + pedido._id);
-    } else {
-      const error = await response.json();
-      alert('Error: ' + error.error);
+  pedidoClient.crearPedido(req, metadataConToken(), (err, pedido) => {
+    if (err) {
+      alert('Error: ' + err.message);
+      return;
     }
-  } catch (err) {
-    alert('Error al crear pedido: ' + err.message);
-  }
+    alert('¡Pedido creado exitosamente! ID: ' + pedido.getId());
+  });
 }
 
 function configurarHamburguesa() {
@@ -262,7 +256,7 @@ function configurarHamburguesa() {
     hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   });
 
-  menu.querySelectorAll('a').forEach(link => {
+  menu.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => menu.classList.remove('open'));
   });
 }
@@ -270,7 +264,6 @@ function configurarHamburguesa() {
 function sliderAutomatico() {
   const slides = Array.from(document.querySelectorAll('.slide'));
   let idx = 0;
-
   if (slides.length === 0) return;
 
   setInterval(() => {
@@ -281,17 +274,11 @@ function sliderAutomatico() {
 }
 
 function suavizarScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener('click', function (e) {
       e.preventDefault();
-      const targetId = this.getAttribute('href');
-      const targetElement = document.querySelector(targetId);
-
-      if (targetElement) {
-        targetElement.scrollIntoView({
-          behavior: 'smooth'
-        });
-      }
+      const targetElement = document.querySelector(this.getAttribute('href'));
+      if (targetElement) targetElement.scrollIntoView({ behavior: 'smooth' });
     });
   });
 }
@@ -317,35 +304,26 @@ function manejarModalProducto() {
     productModal.style.setProperty('display', 'none', 'important');
   });
 
-  productForm.addEventListener('submit', async (e) => {
+  productForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    
-    const titulo = document.getElementById('prodTitulo').value;
-    const precio = parseFloat(document.getElementById('prodPrecio').value);
-    const stock = parseInt(document.getElementById('prodStock').value);
-    const descripcion = document.getElementById('prodDesc').value;
-    const img = document.getElementById('prodImg').value || 'img/default.jpg';
 
-    try {
-      const response = await fetch(`${API_URL}/productos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ titulo, precio, stock, descripcion, img })
-      });
+    const req = new CrearProductoRequest();
+    req.setTitulo(document.getElementById('prodTitulo').value);
+    req.setPrecio(parseFloat(document.getElementById('prodPrecio').value));
+    req.setStock(parseInt(document.getElementById('prodStock').value));
+    req.setDescripcion(document.getElementById('prodDesc').value);
+    req.setImg(document.getElementById('prodImg').value || 'img/default.jpg');
 
-      if (response.ok) {
-        alert('¡Producto añadido con éxito!');
-        productModal.style.setProperty('display', 'none', 'important');
-        productForm.reset();
-        cargarProductos();
-      } else {
-        const errorData = await response.json();
-        alert('Error: ' + errorData.error);
+    productoClient.crearProducto(req, metadataConToken(), (err) => {
+      if (err) {
+        alert('Error: ' + err.message);
+        return;
       }
-    } catch (err) {
-      alert('Error en el servidor al agregar producto: ' + err.message);
-    }
+      alert('¡Producto añadido con éxito!');
+      productModal.style.setProperty('display', 'none', 'important');
+      productForm.reset();
+      cargarProductos();
+    });
   });
 }
 

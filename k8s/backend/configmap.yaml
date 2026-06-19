@@ -5,6 +5,4 @@ metadata:
   namespace: totalservice
 data:
   MONGO_URI: "mongodb://mongo-svc.totalservice.svc.cluster.local:27017/totalservice"
-  PORT: "3000"
-  CORS_ORIGIN: "http://totalservice.local"
-  COOKIE_SECURE: "false"
+  PORT: "50051"

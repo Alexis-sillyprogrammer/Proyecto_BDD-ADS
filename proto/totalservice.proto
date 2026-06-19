@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package totalservice;
+
+service AuthService {
+  rpc Registro (RegistroRequest) returns (RegistroResponse);
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc Me (MeRequest) returns (MeResponse);
+}
+
+message RegistroRequest {
+  string nombre = 1;
+  string email = 2;
+  string password = 3;
+  string rol = 4; // "cliente" | "empleado"
+}
+
+message RegistroResponse {
+  string mensaje = 1;
+  string id = 2;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+  string rol = 2;
+  string nombre = 3;
+}
+
+message MeRequest {}
+
+message MeResponse {
+  string id = 1;
+  string rol = 2;
+  string nombre = 3;
+}
+
+service ProductoService {
+  rpc ObtenerProductos (Vacio) returns (ProductosResponse);
+  rpc ObtenerProducto (ProductoIdRequest) returns (Producto);
+  rpc CrearProducto (CrearProductoRequest) returns (Producto);
+  rpc ActualizarProducto (ActualizarProductoRequest) returns (Producto);
+  rpc EliminarProducto (ProductoIdRequest) returns (MensajeResponse);
+}
+
+message Vacio {}
+
+message Producto {
+  string id = 1;
+  string titulo = 2;
+  double precio = 3;
+  string img = 4;
+  string descripcion = 5;
+  int32 stock = 6;
+}
+
+message ProductosResponse {
+  repeated Producto productos = 1;
+}
+
+message ProductoIdRequest {
+  string id = 1;
+}
+
+message CrearProductoRequest {
+  string titulo = 1;
+  double precio = 2;
+  string img = 3;
+  string descripcion = 4;
+  int32 stock = 5;
+}
+
+message ActualizarProductoRequest {
+  string id = 1;
+  string titulo = 2;
+  double precio = 3;
+  string img = 4;
+  string descripcion = 5;
+  int32 stock = 6;
+}
+
+message MensajeResponse {
+  string mensaje = 1;
+}
+
+service PedidoService {
+  rpc CrearPedido (CrearPedidoRequest) returns (Pedido);
+  rpc ObtenerMisPedidos (Vacio) returns (PedidosResponse);
+  rpc CancelarPedido (PedidoIdRequest) returns (Pedido);
+  rpc ObtenerTodosPedidos (Vacio) returns (PedidosResponse); // solo empleado
+}
+
+message CrearPedidoRequest {
+  string producto = 1; // id del producto
+  int32 cantidad = 2;
+}
+
+message PedidoIdRequest {
+  string id = 1;
+}
+
+message Pedido {
+  string id = 1;
+  string clienteId = 2;
+  string clienteNombre = 3;
+  Producto producto = 4;
+  int32 cantidad = 5;
+  string estado = 6; // pendiente | cancelado | completado
+}
+
+message PedidosResponse {
+  repeated Pedido pedidos = 1;
+}

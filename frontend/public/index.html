@@ -297,6 +297,9 @@
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+  window.GRPC_WEB_URL = window.location.protocol + '//' + window.location.hostname + ':8081';
+  </script>
+  <script src="script.bundle.js"></script>
 </body>
 </html>
