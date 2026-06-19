@@ -10,7 +10,6 @@
 </head>
 <body>
 
-  <!-- ====== Encabezado ====== -->
   <header>
     <div class="topbar">
       <div class="brand">
@@ -44,7 +43,6 @@
     </div>
   </header>
 
-  <!-- ====== Hero / Slider ====== -->
   <section id="home" class="hero">
     <div class="slides" id="slides">
       <div class="slide active" style="background-image:url('img/slide1.jpg');"></div>
@@ -64,7 +62,6 @@
     </div>
   </section>
 
-  <!-- ====== Botones rápidos ====== -->
   <section class="container">
     <div class="section-head">
       <h3>Tu auto, siempre al 100%</h3>
@@ -98,11 +95,11 @@
     </div>
   </section>
 
-  <!-- ====== Productos ====== -->
   <section id="productos" class="container">
     <div class="section-head">
       <h3>Catálogo de Autopartes</h3>
       <p class="muted">Cargamos 3 productos y puedes agregar más</p>
+      <button id="btnAgregarProducto" class="btn btn-primary" style="display: none; margin-top: 10px;">+ Agregar Producto</button>
     </div>
 
     <div id="productGrid" class="grid">
@@ -234,7 +231,6 @@
     </div>
   </section>
 
-  <!-- ====== Modal de Login/Registro ====== -->
   <div id="authModal" class="modal" style="display:none;">
     <div class="modal-content">
       <button id="closeModal" class="close-btn">&times;</button>
@@ -284,7 +280,36 @@
     </div>
   </div>
 
-  <!-- ====== Footer ====== -->
+  <div id="productModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <button id="closeProductModal" class="close-btn">×</button>
+      <h2>Agregar Nuevo Producto</h2>
+      <form id="productForm">
+        <div class="field">
+          <label for="prodTitulo">Título del Producto</label>
+          <input id="prodTitulo" type="text" required />
+        </div>
+        <div class="field">
+          <label for="prodPrecio">Precio ($)</label>
+          <input id="prodPrecio" type="number" min="0" required />
+        </div>
+        <div class="field">
+          <label for="prodStock">Stock Inicial</label>
+          <input id="prodStock" type="number" min="0" value="1" required />
+        </div>
+        <div class="field">
+          <label for="prodDesc">Descripción</label>
+          <textarea id="prodDesc" rows="3" required></textarea>
+        </div>
+        <div class="field">
+          <label for="prodImg">Ruta de Imagen (Opcional)</label>
+          <input id="prodImg" type="text" placeholder="img/producto_bujias.jpg" />
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Producto</button>
+      </form>
+    </div>
+  </div>
+
   <footer>
     <div class="foot">
       <div>

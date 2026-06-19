@@ -4,7 +4,12 @@ const Producto = require('../models/Producto');
 const { requireAuth, requireRol } = require('../middleware/auth');
 
 router.get('/', async (req, res) => {
-    res.json(await Producto.find());
+    try {
+        const productos = await Producto.find();
+        res.json(productos);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener productos' });
+    }
 });
 
 router.get('/:id', async (req, res) => {
@@ -14,9 +19,27 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', requireAuth, requireRol('empleado'), async (req, res) => {
-    const producto = new Producto(req.body);
-    await producto.save();
-    res.status(201).json(producto);
+    try {
+        const { titulo, precio, img, descripcion, stock } = req.body;
+        
+        if (!titulo || !precio) {
+            return res.status(400).json({ error: 'El título y el precio son campos obligatorios.' });
+        }
+
+        const nuevoProducto = new Producto({
+            titulo,
+            precio,
+            img,
+            descripcion,
+            stock
+        });
+
+        await nuevoProducto.save();
+        res.status(201).json(nuevoProducto);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno al guardar el producto.' });
+    }
 });
 
 router.put('/:id', requireAuth, requireRol('empleado'), async (req, res) => {

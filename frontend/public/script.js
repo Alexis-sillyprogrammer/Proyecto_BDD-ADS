@@ -1,13 +1,10 @@
-// API base URL
-const API_URL = 'http://localhost:3000';
-
-// ====== Estado de la aplicación ======
+const API_URL = '/api';
 let usuarioActual = null;
 
-// ====== Inicialización ======
 document.addEventListener('DOMContentLoaded', () => {
   verificarSesion();
   manejarModal();
+  manejarModalProducto();
   cargarProductos();
   manejarFormularios();
   configurarHamburguesa();
@@ -15,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarAño();
 });
 
-// ====== Verificar sesión al cargar ======
 async function verificarSesion() {
   try {
     const response = await fetch(`${API_URL}/auth/me`, {
@@ -32,23 +28,27 @@ async function verificarSesion() {
   }
 }
 
-// ====== Actualizar UI según estado de usuario ======
 function actualizarUIUsuario() {
   const btnLogin = document.getElementById('btnLogin');
   const userInfo = document.getElementById('userInfo');
   const userName = document.getElementById('userName');
+  const btnAgregarProducto = document.getElementById('btnAgregarProducto');
   
   if (usuarioActual) {
     btnLogin.style.display = 'none';
     userInfo.style.display = 'flex';
     userName.textContent = `${usuarioActual.rol === 'empleado' ? '👨‍💼' : '👤'} Usuario`;
+    
+    if (usuarioActual.rol === 'empleado' && btnAgregarProducto) {
+      btnAgregarProducto.style.display = 'inline-block';
+    }
   } else {
     btnLogin.style.display = 'block';
     userInfo.style.display = 'none';
+    if (btnAgregarProducto) btnAgregarProducto.style.display = 'none';
   }
 }
 
-// ====== Modal de Login/Registro ======
 function manejarModal() {
   const authModal = document.getElementById('authModal');
   const btnLogin = document.getElementById('btnLogin');
@@ -91,7 +91,6 @@ function manejarModal() {
   });
 }
 
-// ====== Formularios de login/registro ======
 function manejarFormularios() {
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
@@ -117,7 +116,7 @@ function manejarFormularios() {
         document.getElementById('authModal').style.display = 'none';
         loginForm.reset();
         alert('¡Bienvenido ' + data.nombre + '!');
-        cargarProductos(); // Recargar para mostrar opciones según el rol
+        cargarProductos();
       } else {
         alert('Email o contraseña incorrectos');
       }
@@ -170,7 +169,6 @@ function manejarFormularios() {
   });
 }
 
-// ====== Cargar productos dinámicamente ======
 async function cargarProductos() {
   const productGrid = document.getElementById('productGrid');
   
@@ -208,7 +206,6 @@ async function cargarProductos() {
         productGrid.appendChild(card);
       });
 
-      // Agregar eventos a botones de pedir
       if (usuarioActual && usuarioActual.rol === 'cliente') {
         document.querySelectorAll('.btn-pedir').forEach(btn => {
           btn.addEventListener('click', (e) => mostrarFormularioPedido(e.target.dataset.id, e.target.dataset.titulo));
@@ -221,7 +218,6 @@ async function cargarProductos() {
   }
 }
 
-// ====== Mostrar formulario de pedido ======
 function mostrarFormularioPedido(productoId, productoTitulo) {
   if (!usuarioActual) {
     alert('Debes iniciar sesión para hacer un pedido');
@@ -236,7 +232,6 @@ function mostrarFormularioPedido(productoId, productoTitulo) {
   }
 }
 
-// ====== Crear pedido ======
 async function crearPedido(productoId, cantidad) {
   try {
     const response = await fetch(`${API_URL}/pedidos`, {
@@ -258,7 +253,6 @@ async function crearPedido(productoId, cantidad) {
   }
 }
 
-// ====== Menú hamburguesa ======
 function configurarHamburguesa() {
   const hamburger = document.getElementById('hamburger');
   const menu = document.getElementById('menu');
@@ -273,7 +267,6 @@ function configurarHamburguesa() {
   });
 }
 
-// ====== Slider automático ======
 function sliderAutomatico() {
   const slides = Array.from(document.querySelectorAll('.slide'));
   let idx = 0;
@@ -287,7 +280,6 @@ function sliderAutomatico() {
   }, 4000);
 }
 
-// ====== Suavizar scroll ======
 function suavizarScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -304,10 +296,57 @@ function suavizarScroll() {
   });
 }
 
-// ====== Actualizar año en footer ======
 function actualizarAño() {
   document.getElementById('y').textContent = new Date().getFullYear();
 }
 
-// Iniciar slider
+function manejarModalProducto() {
+  const productModal = document.getElementById('productModal');
+  const btnAgregarProducto = document.getElementById('btnAgregarProducto');
+  const closeProductModal = document.getElementById('closeProductModal');
+  const productForm = document.getElementById('productForm');
+
+  if (!btnAgregarProducto) return;
+
+  btnAgregarProducto.addEventListener('click', () => {
+    productModal.style.setProperty('display', 'flex', 'important');
+  });
+
+  closeProductModal.addEventListener('click', (e) => {
+    e.preventDefault();
+    productModal.style.setProperty('display', 'none', 'important');
+  });
+
+  productForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const titulo = document.getElementById('prodTitulo').value;
+    const precio = parseFloat(document.getElementById('prodPrecio').value);
+    const stock = parseInt(document.getElementById('prodStock').value);
+    const descripcion = document.getElementById('prodDesc').value;
+    const img = document.getElementById('prodImg').value || 'img/default.jpg';
+
+    try {
+      const response = await fetch(`${API_URL}/productos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ titulo, precio, stock, descripcion, img })
+      });
+
+      if (response.ok) {
+        alert('¡Producto añadido con éxito!');
+        productModal.style.setProperty('display', 'none', 'important');
+        productForm.reset();
+        cargarProductos();
+      } else {
+        const errorData = await response.json();
+        alert('Error: ' + errorData.error);
+      }
+    } catch (err) {
+      alert('Error en el servidor al agregar producto: ' + err.message);
+    }
+  });
+}
+
 sliderAutomatico();
